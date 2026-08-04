@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GAIA Business School — Portal de Pagos</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    /* GAIA palette */
+    --navy:       #1B2A4A;
+    --navy-dark:  #111D35;
+    --navy-light: #E8ECF4;
+    --wine:       #8B1A3A;
+    --wine-dark:  #6A1230;
+    --wine-light: #F5E6EB;
+    --gold:       #C8A96E;
+
+    --bg:         #F2F3F5;
+    --surface:    #FFFFFF;
+    --surface-2:  #F7F8FA;
+    --border:     rgba(27,42,74,0.12);
+    --border-md:  rgba(27,42,74,0.22);
+    --text-1:     #111827;
+    --text-2:     #4B5563;
+    --text-3:     #9CA3AF;
+
+    --green:      #2D6A4F;
+    --green-light:#D8F3DC;
+    --green-text: #1B4332;
+    --red:        #9B2335;
+    --red-light:  #FDE8EC;
+    --amber:      #92400E;
+    --amber-light:#FEF3C7;
+
+    --radius:    10px;
+    --radius-sm:  6px;
+    --radius-lg: 14px;
+    --shadow: 0 1px 4px rgba(27,42,74,0.10), 0 1px 2px rgba(27,42,74,0.06);
+  }
+
+  html, body { height: 100%; font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text-1); font-size: 15px; line-height: 1.5; }
+
+  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  /* ── LOGO SVG ── */
+  .gaia-logo { display: flex; align-items: center; gap: 10px; }
+  .gaia-logo svg { height: 36px; width: auto; }
+
+  /* ── LOGIN ── */
+  #login-screen {
+    align-items: center; justify-content: center; padding: 0;
+    background: var(--navy);
+    min-height: 100vh;
+  }
+  .login-bg {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, #111D35 0%, #1B2A4A 60%, #2A3F6A 100%);
+  }
+  .login-container { position: relative; z-index: 1; width: 100%; max-width: 440px; padding: 2rem; }
+
+  .login-brand {
+    display: flex; flex-direction: column; align-items: center; margin-bottom: 2.5rem;
+  }
+  .login-brand svg { height: 52px; width: auto; margin-bottom: 8px; }
+  .login-brand .tagline { font-size: 12px; color: rgba(255,255,255,0.45); letter-spacing: .1em; text-transform: uppercase; }
+
+  .login-card { background: var(--surface); border-radius: var(--radius-lg); padding: 2.25rem 2rem; box-shadow: 0 8px 32px rgba(0,0,0,.28); }
+  .login-card h2 { font-size: 20px; font-weight: 600; margin-bottom: 4px; color: var(--navy); }
+  .login-card .sub { font-size: 13px; color: var(--text-2); margin-bottom: 1.75rem; }
+
+  .field { margin-bottom: 1.1rem; }
+  .field label { display: block; font-size: 13px; font-weight: 500; color: var(--text-2); margin-bottom: 6px; }
+  .field input {
+    width: 100%; height: 42px; padding: 0 14px;
+    border: 1px solid var(--border-md); border-radius: var(--radius-sm);
+    font-size: 14px; font-family: inherit;
+    background: var(--surface); color: var(--text-1);
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .field input:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(27,42,74,.12); }
+  .field input::placeholder { color: var(--text-3); }
+
+  .btn-primary {
+    width: 100%; height: 44px;
+    background: var(--navy); color: #fff;
+    border: none; border-radius: var(--radius-sm);
+    font-size: 15px; font-weight: 600; font-family: inherit;
+    cursor: pointer; margin-top: 0.5rem; transition: background .15s;
+  }
+  .btn-primary:hover { background: var(--navy-dark); }
+  .login-divider { display: flex; align-items: center; gap: 10px; margin: 1.25rem 0; }
+  .login-divider span { font-size: 12px; color: var(--text-3); white-space: nowrap; }
+  .login-divider::before, .login-divider::after { content:''; flex: 1; height: 1px; background: var(--border); }
+  .login-hint { font-size: 12px; color: var(--text-3); text-align: center; margin-top: .75rem; }
+
+  .btn-google {
+    width: 100%; height: 44px;
+    background: #fff; color: #3c4043;
+    border: 1px solid var(--border-md); border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 500; font-family: inherit;
+    cursor: pointer; transition: background .15s, box-shadow .15s;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .btn-google:hover { background: #F7F8FA; box-shadow: 0 1px 3px rgba(27,42,74,.12); }
+  .btn-google svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    background: var(--navy);
+    border-bottom: 3px solid var(--wine);
+    padding: 0 1.75rem; height: 62px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .topbar-left .gaia-logo svg { height: 30px; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .student-badge { display: flex; align-items: center; gap: 10px; }
+  .avatar {
+    width: 34px; height: 34px;
+    background: var(--wine); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; color: #fff; flex-shrink: 0;
+  }
+  .student-info .sname { font-size: 13px; font-weight: 500; color: #fff; }
+  .student-info .scarne { font-size: 11px; color: rgba(255,255,255,.5); }
+  .btn-logout {
+    height: 34px; padding: 0 12px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: var(--radius-sm);
+    font-size: 13px; font-family: inherit;
+    cursor: pointer; color: rgba(255,255,255,.8);
+    display: flex; align-items: center; gap: 6px; transition: background .15s;
+  }
+  .btn-logout:hover { background: rgba(255,255,255,.15); }
+
+  /* ── PAGE BODY ── */
+  .page-body { flex: 1; padding: 2rem 1.75rem; max-width: 800px; width: 100%; margin: 0 auto; }
+  .page-body h2 { font-size: 20px; font-weight: 600; margin-bottom: 4px; color: var(--navy); }
+  .page-body > p { font-size: 14px; color: var(--text-2); margin-bottom: 1.75rem; }
+
+  /* ── SUMMARY STRIP ── */
+  .summary-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 2rem; }
+  .s-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; border-top: 3px solid var(--navy-light); }
+  .s-card.accent { border-top-color: var(--wine); }
+  .s-card .s-label { font-size: 11px; color: var(--text-3); font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .06em; }
+  .s-card .s-val { font-size: 24px; font-weight: 600; color: var(--text-1); }
+  .s-card .s-val.danger { color: var(--wine); }
+  .s-card .s-val.success { color: var(--green); }
+
+  /* ── MENU CARDS ── */
+  .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .menu-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 1.75rem 1.5rem;
+    cursor: pointer; transition: border-color .15s, transform .1s, box-shadow .15s;
+    border-bottom: 3px solid var(--border);
+  }
+  .menu-card:hover { border-color: var(--navy); border-bottom-color: var(--wine); box-shadow: 0 4px 16px rgba(27,42,74,.1); transform: translateY(-2px); }
+  .mc-icon { width: 52px; height: 52px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; margin-bottom: 1.1rem; }
+  .mc-icon.navy { background: var(--navy-light); }
+  .mc-icon.navy i { color: var(--navy); font-size: 26px; }
+  .mc-icon.wine { background: var(--wine-light); }
+  .mc-icon.wine i { color: var(--wine); font-size: 26px; }
+  .menu-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 5px; color: var(--navy); }
+  .menu-card p { font-size: 13px; color: var(--text-2); line-height: 1.5; }
+  .mc-badge { display: inline-block; margin-top: 12px; font-size: 12px; padding: 4px 10px; border-radius: var(--radius-sm); font-weight: 500; }
+  .mc-badge.navy { background: var(--navy-light); color: var(--navy); }
+  .mc-badge.wine { background: var(--wine-light); color: var(--wine); }
+
+  /* ── PAYMENT ── */
+  #payment-screen { background: var(--bg); }
+  .page-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; }
+  .back-btn {
+    width: 34px; height: 34px; background: var(--surface);
+    border: 1px solid var(--border-md); border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-2); transition: background .15s; flex-shrink: 0;
+  }
+  .back-btn:hover { background: var(--surface-2); }
+  .back-btn i { font-size: 20px; }
+  .page-header h2 { font-size: 20px; font-weight: 600; color: var(--navy); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: start; }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.35rem 1.25rem; }
+  .panel h3 {
+    font-size: 13px; font-weight: 600; color: var(--navy);
+    margin-bottom: 1rem; padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 7px;
+    text-transform: uppercase; letter-spacing: .05em;
+  }
+  .panel h3 i { font-size: 16px; color: var(--wine); }
+
+  .fee-row { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--border); }
+  .fee-row:last-child { border-bottom: none; }
+  .fee-check {
+    width: 20px; height: 20px; border: 1.5px solid var(--border-md);
+    border-radius: 5px; cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s, border-color .15s; user-select: none;
+  }
+  .fee-check.checked { background: var(--navy); border-color: var(--navy); }
+  .fee-check.checked i { color: #fff; font-size: 13px; }
+  .fee-info { flex: 1; min-width: 0; }
+  .fee-name { font-size: 13px; font-weight: 500; }
+  .fee-due { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+  .fee-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+  .fee-amount { font-size: 13px; font-weight: 600; }
+  .tag { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 500; }
+  .tag.overdue { background: var(--amber-light); color: var(--amber); }
+  .tag.pending { background: var(--red-light); color: var(--red); }
+
+  .card-field { margin-bottom: 0.9rem; }
+  .card-field label { display: block; font-size: 12px; font-weight: 500; color: var(--text-2); margin-bottom: 5px; }
+  .card-field input {
+    width: 100%; height: 38px; padding: 0 12px;
+    border: 1px solid var(--border-md); border-radius: var(--radius-sm);
+    font-size: 13px; font-family: inherit;
+    background: var(--surface); color: var(--text-1);
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .card-field input:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(27,42,74,.10); }
+  .card-field input::placeholder { color: var(--text-3); }
+  .card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .total-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px; background: var(--navy-light);
+    border-radius: var(--radius-sm); border: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+  .total-bar .t-label { font-size: 13px; color: var(--text-2); }
+  .total-bar .t-amount { font-size: 18px; font-weight: 600; color: var(--navy); }
+  .btn-pay {
+    width: 100%; height: 44px;
+    background: var(--wine); color: #fff;
+    border: none; border-radius: var(--radius-sm);
+    font-size: 15px; font-weight: 600; font-family: inherit;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    gap: 8px; transition: background .15s;
+  }
+  .btn-pay:hover { background: var(--wine-dark); }
+  .sec-note { display: flex; align-items: center; gap: 6px; justify-content: center; font-size: 12px; color: var(--text-3); margin-top: 10px; }
+
+  /* ── MÉTODO DE PAGO ── */
+  .method-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1.1rem; }
+  .method-tab {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    height: 40px; border: 1px solid var(--border-md); border-radius: var(--radius-sm);
+    background: var(--surface-2); color: var(--text-2);
+    font-size: 13px; font-weight: 500; font-family: inherit; cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s;
+  }
+  .method-tab i { font-size: 16px; }
+  .method-tab.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .method-panel { display: none; }
+  .method-panel.active { display: block; }
+
+  .bank-info { background: var(--navy-light); border-radius: var(--radius-sm); padding: 0.9rem 1rem; margin-bottom: 1rem; }
+  .bank-info .bi-row { display: flex; justify-content: space-between; font-size: 13px; padding: 3px 0; }
+  .bank-info .bi-row span:first-child { color: var(--text-2); }
+  .bank-info .bi-row span:last-child { font-weight: 600; color: var(--navy); }
+
+  .upload-box {
+    border: 1.5px dashed var(--border-md); border-radius: var(--radius-sm);
+    padding: 1.5rem 1rem; text-align: center; cursor: pointer;
+    transition: border-color .15s, background .15s; position: relative;
+  }
+  .upload-box:hover, .upload-box.dragover { border-color: var(--navy); background: var(--surface-2); }
+  .upload-box input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-box i { font-size: 28px; color: var(--text-3); display: block; margin-bottom: 8px; }
+  .upload-box .up-text { font-size: 13px; color: var(--text-2); font-weight: 500; }
+  .upload-box .up-hint { font-size: 12px; color: var(--text-3); margin-top: 3px; }
+
+  .upload-preview {
+    display: none; align-items: center; gap: 10px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 10px 12px; margin-top: 10px; background: var(--surface-2);
+  }
+  .upload-preview.show { display: flex; }
+  .upload-preview .up-icon {
+    width: 34px; height: 34px; border-radius: 8px; background: var(--green-light);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .upload-preview .up-icon i { font-size: 17px; color: var(--green-text); }
+  .upload-preview .up-details { flex: 1; min-width: 0; }
+  .upload-preview .up-name { font-size: 13px; font-weight: 500; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .upload-preview .up-size { font-size: 11px; color: var(--text-3); }
+  .upload-remove { background: none; border: none; cursor: pointer; color: var(--text-3); font-size: 18px; padding: 4px; flex-shrink: 0; }
+  .upload-remove:hover { color: var(--red); }
+
+  .field-sm { margin-bottom: 0.9rem; }
+  .field-sm label { display: block; font-size: 12px; font-weight: 500; color: var(--text-2); margin-bottom: 5px; }
+  .field-sm input {
+    width: 100%; height: 38px; padding: 0 12px;
+    border: 1px solid var(--border-md); border-radius: var(--radius-sm);
+    font-size: 13px; font-family: inherit; background: var(--surface); color: var(--text-1);
+  }
+  .field-sm input:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(27,42,74,.10); }
+
+  /* ── MODAL ── */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(17,29,53,.55);
+    display: none; align-items: center; justify-content: center;
+    z-index: 100; padding: 1.5rem;
+  }
+  .overlay.show { display: flex; }
+  .modal {
+    background: var(--surface); border-radius: var(--radius-lg);
+    padding: 2.5rem 2rem; width: 100%; max-width: 340px;
+    text-align: center; box-shadow: 0 24px 48px rgba(0,0,0,.22);
+    border-top: 4px solid var(--wine);
+  }
+  .modal-icon { width: 64px; height: 64px; background: var(--green-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; }
+  .modal-icon i { color: var(--green); font-size: 32px; }
+  .modal h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; color: var(--navy); }
+  .modal p { font-size: 14px; color: var(--text-2); line-height: 1.6; margin-bottom: 1.75rem; }
+  .modal .btn-close {
+    width: 100%; height: 44px; background: var(--navy); color: #fff;
+    border: none; border-radius: var(--radius-sm);
+    font-size: 15px; font-weight: 600; font-family: inherit;
+    cursor: pointer; transition: background .15s;
+  }
+  .modal .btn-close:hover { background: var(--navy-dark); }
+
+  /* ── HISTORY ── */
+  #history-screen { background: var(--bg); }
+  .history-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 1.5rem; }
+  .hs-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.25rem; border-top: 3px solid var(--navy-light); }
+  .hs-card.accent { border-top-color: var(--wine); }
+  .hs-label { font-size: 11px; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+  .hs-val { font-size: 20px; font-weight: 600; color: var(--text-1); }
+  .hs-val.green { color: var(--green); }
+  .hs-val.small { font-size: 14px; padding-top: 3px; }
+
+  .filters { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+  .filter-label { font-size: 13px; color: var(--text-2); font-weight: 500; }
+  .filters select {
+    height: 38px; padding: 0 10px;
+    border: 1px solid var(--border-md); border-radius: var(--radius-sm);
+    font-size: 13px; font-family: inherit;
+    background: var(--surface); color: var(--text-1); cursor: pointer;
+  }
+  .filters select:focus { outline: none; border-color: var(--navy); }
+  .btn-reset {
+    height: 38px; padding: 0 12px; background: transparent;
+    border: 1px solid var(--border-md); border-radius: var(--radius-sm);
+    font-size: 13px; font-family: inherit; cursor: pointer; color: var(--text-2);
+    display: flex; align-items: center; gap: 6px; transition: background .15s;
+  }
+  .btn-reset:hover { background: var(--surface-2); }
+
+  .hist-table { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .ht-head { display: grid; grid-template-columns: 2.5fr 1.2fr 1fr 1fr; padding: 10px 16px; background: var(--navy); border-bottom: 1px solid var(--border); }
+  .ht-head span { font-size: 11px; font-weight: 600; color: rgba(255,255,255,.7); text-transform: uppercase; letter-spacing: .06em; }
+  .ht-row { display: grid; grid-template-columns: 2.5fr 1.2fr 1fr 1fr; padding: 13px 16px; border-bottom: 1px solid var(--border); align-items: center; transition: background .1s; }
+  .ht-row:last-child { border-bottom: none; }
+  .ht-row:hover { background: var(--surface-2); }
+  .ht-row .r-name { font-size: 13px; font-weight: 500; }
+  .ht-row .r-date { font-size: 13px; color: var(--text-2); }
+  .ht-row .r-amount { font-size: 13px; font-weight: 600; color: var(--navy); }
+  .paid-chip { display: inline-flex; align-items: center; gap: 5px; background: var(--green-light); color: var(--green-text); font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 500; }
+  .paid-chip i { font-size: 14px; }
+  .empty { text-align: center; padding: 3rem 1rem; color: var(--text-3); }
+  .empty i { font-size: 36px; display: block; margin-bottom: 10px; }
+  .empty p { font-size: 14px; }
+
+  @media (max-width: 600px) {
+    .two-col, .menu-grid, .summary-strip, .history-summary { grid-template-columns: 1fr; }
+    .ht-head, .ht-row { grid-template-columns: 2fr 1fr 1fr; }
+    .ht-head span:nth-child(2), .ht-row .r-date { display: none; }
+    .page-body { padding: 1.25rem 1rem; }
+    .topbar { padding: 0 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ====== SVG LOGO SNIPPET (reusable) ====== -->
+<!-- GAIA logo in white for dark backgrounds / navy for light -->
+<svg style="display:none">
+  <symbol id="logo-white" viewBox="0 0 220 52">
+    <!-- flower icon -->
+    <rect x="0" y="0" width="22" height="22" rx="5" fill="white" opacity="1"/>
+    <rect x="24" y="0" width="22" height="22" rx="5" fill="white" opacity=".65"/>
+    <rect x="0" y="24" width="22" height="22" rx="5" fill="white" opacity=".65"/>
+    <rect x="24" y="24" width="22" height="22" rx="5" fill="white" opacity=".35"/>
+    <!-- GAIA text -->
+    <text x="56" y="36" font-family="DM Sans, sans-serif" font-weight="700" font-size="30" fill="white" letter-spacing="3">GAIA</text>
+    <!-- BUSINESS SCHOOL -->
+    <text x="58" y="48" font-family="DM Sans, sans-serif" font-weight="500" font-size="10" fill="white" opacity=".7" letter-spacing="4">BUSINESS SCHOOL</text>
+  </symbol>
+  <symbol id="logo-navy" viewBox="0 0 220 52">
+    <rect x="0" y="0" width="22" height="22" rx="5" fill="#1B2A4A" opacity="1"/>
+    <rect x="24" y="0" width="22" height="22" rx="5" fill="#1B2A4A" opacity=".65"/>
+    <rect x="0" y="24" width="22" height="22" rx="5" fill="#1B2A4A" opacity=".65"/>
+    <rect x="24" y="24" width="22" height="22" rx="5" fill="#1B2A4A" opacity=".35"/>
+    <text x="56" y="36" font-family="DM Sans, sans-serif" font-weight="700" font-size="30" fill="#1B2A4A" letter-spacing="3">GAIA</text>
+    <text x="58" y="48" font-family="DM Sans, sans-serif" font-weight="500" font-size="10" fill="#1B2A4A" opacity=".7" letter-spacing="4">BUSINESS SCHOOL</text>
+  </symbol>
+</svg>
+
+<!-- ====== LOGIN ====== -->
+<div class="screen active" id="login-screen">
+  <div class="login-bg"></div>
+  <div class="login-container">
+    <div class="login-brand">
+      <svg viewBox="0 0 220 52" style="height:56px;width:auto">
+        <rect x="0" y="0" width="22" height="22" rx="5" fill="white"/>
+        <rect x="24" y="0" width="22" height="22" rx="5" fill="white" opacity=".6"/>
+        <rect x="0" y="24" width="22" height="22" rx="5" fill="white" opacity=".6"/>
+        <rect x="24" y="24" width="22" height="22" rx="5" fill="white" opacity=".3"/>
+        <text x="56" y="36" font-family="DM Sans, sans-serif" font-weight="700" font-size="30" fill="white" letter-spacing="3">GAIA</text>
+        <text x="58" y="49" font-family="DM Sans, sans-serif" font-weight="500" font-size="10" fill="white" opacity=".65" letter-spacing="4">BUSINESS SCHOOL</text>
+      </svg>
+      <span class="tagline">Portal de Pagos Académicos</span>
+    </div>
+    <div class="login-card">
+      <h2>Iniciar sesión</h2>
+      <p class="sub">Ingresa tus credenciales para acceder al portal</p>
+      <div class="field">
+        <label for="u-input">Número de carné</label>
+        <input type="text" id="u-input" placeholder="Ej. 2021001234" value="2021001234">
+      </div>
+      <div class="field">
+        <label for="p-input">Contraseña</label>
+        <input type="password" id="p-input" placeholder="••••••••" value="12345678">
+      </div>
+      <button class="btn-primary" onclick="goMenu()">Ingresar al portal</button>
+      <div class="login-divider"><span>o</span></div>
+      <button class="btn-google" onclick="goMenu()">
+        <svg viewBox="0 0 48 48">
+          <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+          <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+          <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+          <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+        </svg>
+        Continuar con Google
+      </button>
+      <div class="login-hint">Demo: cualquier credencial funciona</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== MENÚ ====== -->
+<div class="screen" id="menu-screen">
+  <nav class="topbar">
+    <div class="topbar-left">
+      <svg viewBox="0 0 220 52" style="height:32px;width:auto">
+        <rect x="0" y="0" width="22" height="22" rx="5" fill="white"/>
+        <rect x="24" y="0" width="22" height="22" rx="5" fill="white" opacity=".6"/>
+        <rect x="0" y="24" width="22" height="22" rx="5" fill="white" opacity=".6"/>
+        <rect x="24" y="24" width="22" height="22" rx="5" fill="white" opacity=".3"/>
+        <text x="56" y="36" font-family="DM Sans, sans-serif" font-weight="700" font-size="30" fill="white" letter-spacing="3">GAIA</text>
+        <text x="58" y="49" font-family="DM Sans, sans-serif" font-weight="500" font-size="10" fill="white" opacity=".65" letter-spacing="4">BUSINESS SCHOOL</text>
+      </svg>
+    </div>
+    <div class="topbar-right">
+      <div class="student-badge">
+        <div class="avatar">MG</div>
+        <div class="student-info">
+          <div class="sname">María García</div>
+          <div class="scarne">Carné: 2021001234</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="goLogin()"><i class="ti ti-logout"></i>Salir</button>
+    </div>
+  </nav>
+  <div class="page-body">
+    <h2>Menú principal</h2>
+    <p>Bienvenida, María. Gestiona tus pagos académicos desde aquí.</p>
+    <div class="summary-strip">
+      <div class="s-card accent"><div class="s-label">Cuotas pendientes</div><div class="s-val danger">3</div></div>
+      <div class="s-card accent"><div class="s-label">Monto adeudado</div><div class="s-val danger">Q3,150</div></div>
+      <div class="s-card"><div class="s-label">Cuotas pagadas</div><div class="s-val success">5</div></div>
+    </div>
+    <div class="menu-grid">
+      <div class="menu-card" onclick="goPayment()">
+        <div class="mc-icon navy"><i class="ti ti-credit-card"></i></div>
+        <h3>Realizar pago</h3>
+        <p>Paga tus cuotas pendientes de forma segura con tarjeta de crédito</p>
+        <span class="mc-badge navy">3 cuotas pendientes</span>
+      </div>
+      <div class="menu-card" onclick="goHistory()">
+        <div class="mc-icon wine"><i class="ti ti-history"></i></div>
+        <h3>Historial de pagos</h3>
+        <p>Consulta y descarga el detalle de todas las cuotas que has cancelado</p>
+        <span class="mc-badge wine">5 pagos realizados</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== PAGO ====== -->
+<div class="screen" id="payment-screen">
+  <nav class="topbar">
+    <div class="topbar-left">
+      <svg viewBox="0 0 220 52" style="height:32px;width:auto">
+        <rect x="0" y="0" width="22" height="22" rx="5" fill="white"/>
+        <rect x="24" y="0" width="22" height="22" rx="5" fill="white" opacity=".6"/>
+        <rect x="0" y="24" width="22" height="22" rx="5" fill="white" opacity=".6"/>
+        <rect x="24" y="24" width="22" height="22" rx="5" fill="white" opacity=".3"/>
+        <text x="56" y="36" font-family="DM Sans, sans-serif" font-weight="700" font-size="30" fill="white" letter-spacing="3">GAIA</text>
+        <text x="58" y="49" font-family="DM Sans, sans-serif" font-weight="500" font-size="10" fill="white" opacity=".65" letter-spacing="4">BUSINESS SCHOOL</text>
+      </svg>
+    </div>
+    <div class="topbar-right">
+      <div class="student-badge">
+        <div class="avatar">MG</div>
+        <div class="student-info">
+          <div class="sname">María García</div>
+          <div class="scarne">Carné: 2021001234</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="goLogin()"><i class="ti ti-logout"></i>Salir</button>
+    </div>
+  </nav>
+  <div class="page-body">
+    <div class="page-header">
+      <button class="back-btn" onclick="goMenu()"><i class="ti ti-arrow-left"></i></button>
+      <h2>Realizar pago</h2>
+    </div>
+    <div class="two-col">
+      <div class="panel">
+        <h3><i class="ti ti-list-check"></i>Cuotas pendientes</h3>
+        <div id="fee-list">
+          <div class="fee-row">
+            <div class="fee-check checked" onclick="toggleFee(this)" data-amount="1050"><i class="ti ti-check"></i></div>
+            <div class="fee-info">
+              <div class="fee-name">Cuota 6 — Junio 2025</div>
+              <div class="fee-due">Vencimiento: 05/06/2025</div>
+            </div>
+            <div class="fee-right">
+              <div class="fee-amount">Q1,050</div>
+              <span class="tag overdue">Vencida</span>
+            </div>
+          </div>
+          <div class="fee-row">
+            <div class="fee-check checked" onclick="toggleFee(this)" data-amount="1050"><i class="ti ti-check"></i></div>
+            <div class="fee-info">
+              <div class="fee-name">Cuota 7 — Julio 2025</div>
+              <div class="fee-due">Vencimiento: 05/07/2025</div>
+            </div>
+            <div class="fee-right">
+              <div class="fee-amount">Q1,050</div>
+              <span class="tag overdue">Vencida</span>
+            </div>
+          </div>
+          <div class="fee-row">
+            <div class="fee-check checked" onclick="toggleFee(this)" data-amount="1050"><i class="ti ti-check"></i></div>
+            <div class="fee-info">
+              <div class="fee-name">Cuota 8 — Agosto 2025</div>
+              <div class="fee-due">Vencimiento: 05/08/2025</div>
+            </div>
+            <div class="fee-right">
+              <div class="fee-amount">Q1,050</div>
+              <span class="tag pending">Pendiente</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="panel" style="margin-bottom:1rem;">
+          <h3><i class="ti ti-wallet"></i>Método de pago</h3>
+          <div class="method-tabs">
+            <button type="button" class="method-tab active" id="tab-card" onclick="selectMethod('card')"><i class="ti ti-credit-card"></i>Tarjeta</button>
+            <button type="button" class="method-tab" id="tab-transfer" onclick="selectMethod('transfer')"><i class="ti ti-building-bank"></i>Transferencia</button>
+          </div>
+
+          <div class="method-panel active" id="panel-card">
+            <div class="card-field">
+              <label>Número de tarjeta</label>
+              <input type="text" id="card-num" placeholder="1234 5678 9012 3456" maxlength="19" oninput="fmtCard(this)">
+            </div>
+            <div class="card-field">
+              <label>Nombre en la tarjeta</label>
+              <input type="text" placeholder="MARÍA GARCÍA">
+            </div>
+            <div class="card-row">
+              <div class="card-field">
+                <label>Vencimiento</label>
+                <input type="text" placeholder="MM/AA" maxlength="5" oninput="fmtExp(this)">
+              </div>
+              <div class="card-field">
+                <label>CVV</label>
+                <input type="password" placeholder="•••" maxlength="3">
+              </div>
+            </div>
+          </div>
+
+          <div class="method-panel" id="panel-transfer">
+            <div class="bank-info">
+              <div class="bi-row"><span>Banco</span><span>Banco Industrial</span></div>
+              <div class="bi-row"><span>Cuenta monetaria</span><span>0-123456-7</span></div>
+              <div class="bi-row"><span>A nombre de</span><span>GAIA Business School, S.A.</span></div>
+              <div class="bi-row"><span>NIT</span><span>1234567-8</span></div>
+            </div>
+            <div class="field-sm">
+              <label for="ref-input">Número de boleta / confirmación</label>
+              <input type="text" id="ref-input" placeholder="Ej. 0045871236">
+            </div>
+            <div class="field-sm">
+              <label>Comprobante de depósito</label>
+              <div class="upload-box" id="upload-box">
+                <input type="file" id="file-input" accept="image/*,.pdf" onchange="handleFile(this.files)">
+                <i class="ti ti-cloud-upload"></i>
+                <div class="up-text">Arrastra tu boleta aquí o haz clic para subir</div>
+                <div class="up-hint">JPG, PNG o PDF · Máx. 5 MB</div>
+              </div>
+              <div class="upload-preview" id="upload-preview">
+                <div class="up-icon"><i class="ti ti-file-check"></i></div>
+                <div class="up-details">
+                  <div class="up-name" id="up-name">boleta.jpg</div>
+                  <div class="up-size" id="up-size">120 KB</div>
+                </div>
+                <button type="button" class="upload-remove" onclick="removeFile(event)"><i class="ti ti-x"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <h3><i class="ti ti-receipt"></i>Resumen de pago</h3>
+          <div class="total-bar">
+            <span class="t-label" id="sel-count">3 cuotas seleccionadas</span>
+            <span class="t-amount" id="total-amt">Q3,150</span>
+          </div>
+          <button class="btn-pay" id="btn-pay" onclick="confirmPay()"><i class="ti ti-lock"></i>Pagar ahora</button>
+          <div class="sec-note"><i class="ti ti-shield-check"></i>Pago protegido con cifrado SSL de 256 bits</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== MODAL ÉXITO ====== -->
+<div class="overlay" id="success-overlay">
+  <div class="modal">
+    <div class="modal-icon"><i class="ti ti-check"></i></div>
+    <h3>¡Pago exitoso!</h3>
+    <p>Tu pago de <strong id="modal-amt">Q3,150</strong> fue procesado correctamente. Recibirás un comprobante en tu correo registrado.</p>
+    <button class="btn-close" onclick="afterPay()">Ver historial de pagos</button>
+  </div>
+</div>
+
+<!-- ====== HISTORIAL ====== -->
+<div class="screen" id="history-screen">
+  <nav class="topbar">
+    <div class="topbar-left">
+      <svg viewBox="0 0 220 52" style="height:32px;width:auto">
+        <rect x="0" y="0" width="22" height="22" rx="5" fill="white"/>
+        <rect x="24" y="0" width="22" height="22" rx="5" fill="white" opacity=".6"/>
+        <rect x="0" y="24" width="22" height="22" rx="5" fill="white" opacity=".6"/>
+        <rect x="24" y="24" width="22" height="22" rx="5" fill="white" opacity=".3"/>
+        <text x="56" y="36" font-family="DM Sans, sans-serif" font-weight="700" font-size="30" fill="white" letter-spacing="3">GAIA</text>
+        <text x="58" y="49" font-family="DM Sans, sans-serif" font-weight="500" font-size="10" fill="white" opacity=".65" letter-spacing="4">BUSINESS SCHOOL</text>
+      </svg>
+    </div>
+    <div class="topbar-right">
+      <div class="student-badge">
+        <div class="avatar">MG</div>
+        <div class="student-info">
+          <div class="sname">María García</div>
+          <div class="scarne">Carné: 2021001234</div>
+        </div>
+      </div>
+      <button class="btn-logout" onclick="goLogin()"><i class="ti ti-logout"></i>Salir</button>
+    </div>
+  </nav>
+  <div class="page-body">
+    <div class="page-header">
+      <button class="back-btn" onclick="goMenu()"><i class="ti ti-arrow-left"></i></button>
+      <h2>Historial de pagos</h2>
+    </div>
+    <div class="history-summary">
+      <div class="hs-card accent"><div class="hs-label">Total pagado</div><div class="hs-val green" id="hs-total">Q5,250</div></div>
+      <div class="hs-card"><div class="hs-label">Cuotas canceladas</div><div class="hs-val" id="hs-count">5</div></div>
+      <div class="hs-card"><div class="hs-label">Último pago</div><div class="hs-val small" id="hs-last">15/05/2025</div></div>
+    </div>
+    <div class="filters">
+      <span class="filter-label">Filtrar por:</span>
+      <select id="f-year" onchange="filterHistory()">
+        <option value="">Todos los años</option>
+        <option value="2025">2025</option>
+        <option value="2024">2024</option>
+      </select>
+      <select id="f-month" onchange="filterHistory()">
+        <option value="">Todos los meses</option>
+        <option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option>
+        <option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option>
+        <option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option>
+        <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+      </select>
+      <button class="btn-reset" onclick="resetFilters()"><i class="ti ti-x" style="font-size:14px"></i>Limpiar</button>
+    </div>
+    <div class="hist-table">
+      <div class="ht-head">
+        <span>Concepto</span>
+        <span>Fecha de pago</span>
+        <span>Monto</span>
+        <span>Estado</span>
+      </div>
+      <div id="history-rows"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let payments = [
+    {name:'Cuota 1 — Enero 2024', date:'15/01/2024', y:2024, m:1, amount:1050},
+    {name:'Cuota 2 — Febrero 2024', date:'12/02/2024', y:2024, m:2, amount:1050},
+    {name:'Cuota 3 — Marzo 2024', date:'08/03/2024', y:2024, m:3, amount:1050},
+    {name:'Cuota 4 — Abril 2025', date:'10/04/2025', y:2025, m:4, amount:1050},
+    {name:'Cuota 5 — Mayo 2025', date:'15/05/2025', y:2025, m:5, amount:1050},
+  ];
+
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0,0);
+  }
+  function goLogin()   { show('login-screen'); }
+  function goMenu()    { show('menu-screen'); }
+  function goPayment() { updateTotal(); show('payment-screen'); }
+  function goHistory() { filterHistory(); show('history-screen'); }
+
+  function toggleFee(el) {
+    el.classList.toggle('checked');
+    el.innerHTML = el.classList.contains('checked') ? '<i class="ti ti-check"></i>' : '';
+    updateTotal();
+  }
+  function updateTotal() {
+    let total = 0, count = 0;
+    document.querySelectorAll('.fee-check').forEach(c => {
+      if (c.classList.contains('checked')) { total += parseInt(c.dataset.amount); count++; }
+    });
+    document.getElementById('total-amt').textContent = 'Q' + total.toLocaleString();
+    document.getElementById('sel-count').textContent = count + ' cuota' + (count!==1?'s':'') + ' seleccionada' + (count!==1?'s':'');
+  }
+  function fmtCard(el) {
+    let v = el.value.replace(/\D/g,'').substring(0,16);
+    el.value = v.replace(/(.{4})/g,'$1 ').trim();
+  }
+  function fmtExp(el) {
+    let v = el.value.replace(/\D/g,'');
+    if (v.length > 2) v = v.substring(0,2) + '/' + v.substring(2,4);
+    el.value = v;
+  }
+  let paymentMethod = 'card';
+  let uploadedFile = null;
+
+  function selectMethod(method) {
+    paymentMethod = method;
+    document.getElementById('tab-card').classList.toggle('active', method === 'card');
+    document.getElementById('tab-transfer').classList.toggle('active', method === 'transfer');
+    document.getElementById('panel-card').classList.toggle('active', method === 'card');
+    document.getElementById('panel-transfer').classList.toggle('active', method === 'transfer');
+    const btn = document.getElementById('btn-pay');
+    btn.innerHTML = method === 'transfer'
+      ? '<i class="ti ti-send"></i>Enviar comprobante'
+      : '<i class="ti ti-lock"></i>Pagar ahora';
+  }
+
+  function handleFile(files) {
+    if (!files || !files.length) return;
+    const file = files[0];
+    if (file.size > 5 * 1024 * 1024) { alert('El archivo supera el tamaño máximo de 5 MB.'); return; }
+    uploadedFile = file;
+    document.getElementById('up-name').textContent = file.name;
+    document.getElementById('up-size').textContent = formatSize(file.size);
+    document.getElementById('upload-preview').classList.add('show');
+    document.getElementById('upload-box').style.display = 'none';
+  }
+  function removeFile(e) {
+    e.stopPropagation();
+    uploadedFile = null;
+    document.getElementById('file-input').value = '';
+    document.getElementById('upload-preview').classList.remove('show');
+    document.getElementById('upload-box').style.display = 'block';
+  }
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  const uploadBox = document.getElementById('upload-box');
+  if (uploadBox) {
+    ['dragover','dragenter'].forEach(evt => uploadBox.addEventListener(evt, e => { e.preventDefault(); uploadBox.classList.add('dragover'); }));
+    ['dragleave','drop'].forEach(evt => uploadBox.addEventListener(evt, e => { e.preventDefault(); uploadBox.classList.remove('dragover'); }));
+    uploadBox.addEventListener('drop', e => { if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files); });
+  }
+
+  function confirmPay() {
+    const amt = document.getElementById('total-amt').textContent;
+    if (amt === 'Q0') { alert('Por favor selecciona al menos una cuota para pagar.'); return; }
+    if (paymentMethod === 'transfer') {
+      if (!document.getElementById('ref-input').value.trim()) { alert('Por favor ingresa el número de boleta o confirmación.'); return; }
+      if (!uploadedFile) { alert('Por favor sube tu comprobante de depósito para continuar.'); return; }
+    }
+    document.getElementById('modal-amt').textContent = amt;
+    document.querySelector('#success-overlay h3').textContent = paymentMethod === 'transfer' ? '¡Comprobante enviado!' : '¡Pago exitoso!';
+    document.querySelector('#success-overlay p').innerHTML = paymentMethod === 'transfer'
+      ? 'Tu comprobante fue recibido correctamente. Verificaremos tu depósito de <strong id="modal-amt">'+amt+'</strong> y actualizaremos tu estado de cuenta en un plazo de 24 a 48 horas.'
+      : 'Tu pago de <strong id="modal-amt">'+amt+'</strong> fue procesado correctamente. Recibirás un comprobante en tu correo registrado.';
+    document.getElementById('success-overlay').classList.add('show');
+  }
+  function afterPay() {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2,'0');
+    const mm = String(today.getMonth()+1).padStart(2,'0');
+    const yy = today.getFullYear();
+    const count = document.querySelectorAll('.fee-check.checked').length;
+    for (let i = 0; i < count; i++) {
+      payments.push({ name:'Cuota '+(5+i+1)+' — pago reciente', date:dd+'/'+mm+'/'+yy, y:yy, m:today.getMonth()+1, amount:1050 });
+    }
+    document.getElementById('success-overlay').classList.remove('show');
+    filterHistory();
+    show('history-screen');
+  }
+  function filterHistory() {
+    const yr = document.getElementById('f-year').value;
+    const mo = document.getElementById('f-month').value;
+    const rows = payments.filter(p => { if(yr && p.y!=yr) return false; if(mo && p.m!=mo) return false; return true; });
+    const container = document.getElementById('history-rows');
+    if (!rows.length) {
+      container.innerHTML = '<div class="empty"><i class="ti ti-search-off"></i><p>No se encontraron pagos para este período.</p></div>';
+      document.getElementById('hs-total').textContent='Q0'; document.getElementById('hs-count').textContent='0'; document.getElementById('hs-last').textContent='—'; return;
+    }
+    container.innerHTML = rows.map(p=>`<div class="ht-row"><div class="r-name">${p.name}</div><div class="r-date">${p.date}</div><div class="r-amount">Q${p.amount.toLocaleString()}</div><div><span class="paid-chip"><i class="ti ti-circle-check"></i>Pagado</span></div></div>`).join('');
+    const total = rows.reduce((a,p)=>a+p.amount,0);
+    document.getElementById('hs-total').textContent='Q'+total.toLocaleString();
+    document.getElementById('hs-count').textContent=rows.length;
+    document.getElementById('hs-last').textContent=rows[rows.length-1].date;
+  }
+  function resetFilters() { document.getElementById('f-year').value=''; document.getElementById('f-month').value=''; filterHistory(); }
+</script>
+</body>
+</html>
